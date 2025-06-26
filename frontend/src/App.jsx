@@ -202,49 +202,66 @@ function Upload() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [results, setResults] = useState([]);
 
   const handleUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
     setUploading(true);
     setError('');
     setSuccess('');
-    const formData = new FormData();
-    formData.append('image', file);
-    try {
-      const res = await fetch(`${API_URL}/api/upload`, {
-        method: 'POST',
-        body: formData,
-      });
-      if (!res.ok) {
-        let errorMessage = 'Upload failed';
-        try {
-          const errorData = await res.json();
-          errorMessage = errorData.error || errorMessage;
-        } catch {}
-        throw new Error(errorMessage);
+    setResults([]);
+    let allSuccess = true;
+    const newResults = [];
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append('image', file);
+      try {
+        const res = await fetch(`${API_URL}/api/upload`, {
+          method: 'POST',
+          body: formData,
+        });
+        if (!res.ok) {
+          let errorMessage = 'Upload failed';
+          try {
+            const errorData = await res.json();
+            errorMessage = errorData.error || errorMessage;
+          } catch {}
+          throw new Error(errorMessage);
+        }
+        newResults.push({ name: file.name, status: 'success' });
+      } catch (e) {
+        allSuccess = false;
+        newResults.push({ name: file.name, status: 'error', message: e.message });
       }
-      setSuccess('Upload successful! Images will appear in the gallery.');
-    } catch (e) {
-      setError(`Upload failed: ${e.message || 'Unknown error'}`);
-    } finally {
-      setUploading(false);
     }
+    setResults(newResults);
+    setUploading(false);
+    setSuccess(allSuccess ? 'All images uploaded successfully!' : 'Some images failed to upload.');
   };
 
   return (
     <div className="page upload-page">
-      <h1>Upload Image</h1>
+      <h1>Upload Images</h1>
       <Link to="/" className="upload-link">Back to Home/Gallery</Link>
       <div className="upload-section">
         <label className="upload-btn">
-          {uploading ? 'Uploading...' : 'Choose Image to Upload'}
-          <input type="file" accept="image/*" onChange={handleUpload} disabled={uploading} hidden />
+          {uploading ? 'Uploading...' : 'Choose Images to Upload'}
+          <input type="file" accept="image/*" multiple onChange={handleUpload} disabled={uploading} hidden />
         </label>
         {error && <div className="error">{error}</div>}
         {success && <div className="success">{success}</div>}
-        <p style={{color:'#aaa', fontSize:'0.9em'}}>
-          Accepted file types: JPEG, PNG, GIF, WebP, BMP, TIFF.
+        {results.length > 0 && (
+          <ul style={{ margin: '1rem 0', padding: 0, listStyle: 'none', color: '#fff' }}>
+            {results.map((r, i) => (
+              <li key={i} style={{ color: r.status === 'success' ? '#4caf50' : '#f44336' }}>
+                {r.name}: {r.status === 'success' ? 'Uploaded' : `Error - ${r.message}`}
+              </li>
+            ))}
+          </ul>
+        )}
+        <p style={{ color: '#aaa', fontSize: '0.9em' }}>
+          You can select and upload multiple images at once.<br />Accepted file types: JPEG, PNG, GIF, WebP, BMP, TIFF.
         </p>
       </div>
     </div>
