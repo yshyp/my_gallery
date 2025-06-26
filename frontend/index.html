@@ -4,10 +4,80 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Alex Novo Photography Portfolio - Fine Art & Portrait Photography" />
+    <meta name="keywords" content="photography, portfolio, fine art, portraits, Alex Novo" />
+    <meta name="author" content="Alex Novo" />
+    
+    <!-- PWA Theme Colors -->
+    <meta name="theme-color" content="#0a0a0a" />
+    <meta name="msapplication-TileColor" content="#0a0a0a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Alex Novo" />
+    
+    <!-- PWA Icons -->
+    <link rel="apple-touch-icon" href="/icon-192x192.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/icon-16x16.png" />
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#0a0a0a" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Alex Novo Photography Portfolio" />
+    <meta property="og:description" content="Fine Art & Portrait Photography Portfolio" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://yourdomain.com" />
+    <meta property="og:image" content="/og-image.jpg" />
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Alex Novo Photography Portfolio" />
+    <meta name="twitter:description" content="Fine Art & Portrait Photography Portfolio" />
+    <meta name="twitter:image" content="/og-image.jpg" />
+    
+    <title>Alex Novo Photography Portfolio</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+      
+      // PWA Install Prompt
+      let deferredPrompt;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Show install button or banner
+        showInstallPromotion();
+      });
+      
+      function showInstallPromotion() {
+        // You can add a custom install button here
+        console.log('PWA install prompt available');
+      }
+      
+      // Handle app installed
+      window.addEventListener('appinstalled', (evt) => {
+        console.log('PWA installed successfully');
+      });
+    </script>
   </body>
 </html>
