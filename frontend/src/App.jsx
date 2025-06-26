@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react'; // Import useRef
 import { Routes, Route, Link, useLocation } from 'react-router-dom'; // Removed useNavigate as we'll use anchors
 import Masonry from 'react-masonry-css';
 import { motion, AnimatePresence } from 'framer-motion';
+import imageCompression from 'browser-image-compression';
 import './App.css';
 
 const API_URL = 'http://localhost:5000';
@@ -128,7 +129,15 @@ function Gallery() {
       setLoading(true);
       const response = await fetch(`${API_URL}/api/images`);
       if (response.ok) {
-        const data = await response.json();
+        let data = await response.json();
+        // Sort by timestamp (newest first), fallback to filename
+        data.sort((a, b) => {
+          if (a.timestamp && b.timestamp) {
+            return b.timestamp - a.timestamp;
+          }
+          // fallback: sort by filename descending
+          return b.filename.localeCompare(a.filename);
+        });
         setImages(data);
       } else {
         setError('Failed to load images');
@@ -214,8 +223,18 @@ function Upload() {
     let allSuccess = true;
     const newResults = [];
     for (const file of files) {
+      let compressedFile = file;
+      try {
+        compressedFile = await imageCompression(file, {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+        });
+      } catch (err) {
+        console.warn('Compression failed, uploading original:', err);
+      }
       const formData = new FormData();
-      formData.append('image', file);
+      formData.append('image', compressedFile, file.name);
       try {
         const res = await fetch(`${API_URL}/api/upload`, {
           method: 'POST',
