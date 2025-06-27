@@ -1,27 +1,80 @@
 import React, { useEffect, useState, useRef } from 'react'; // Import useRef
-import { Routes, Route, Link, useLocation } from 'react-router-dom'; // Removed useNavigate as we'll use anchors
+import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom'; // Removed useNavigate as we'll use anchors
 import Masonry from 'react-masonry-css';
 import { motion, AnimatePresence } from 'framer-motion';
 import imageCompression from 'browser-image-compression';
 import './App.css';
+import introBg from './assets/intro-bg.jpg';
 
 const API_URL = 'http://localhost:5000';
 
 function Navbar() {
   const location = useLocation();
+  const navigate = useNavigate();
 
-  const scrollToGallery = () => {
-    const gallerySection = document.getElementById('gallery-section');
-    if (gallerySection) {
-      gallerySection.scrollIntoView({ behavior: 'smooth' });
+  // Smooth scroll to gallery section
+  const handleGalleryClick = (e) => {
+    e.preventDefault();
+    if (location.pathname !== '/') {
+      // Go to home, then scroll after navigation
+      navigate('/', { state: { scrollToGallery: true } });
+    } else {
+      const gallerySection = document.getElementById('gallery-section');
+      if (gallerySection) {
+        gallerySection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
+
+  // Smooth scroll to top (intro section)
+  const handleHomeClick = (e) => {
+    e.preventDefault();
+    if (location.pathname !== '/') {
+      navigate('/');
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  // Smooth scroll to contact section
+  const handleContactClick = (e) => {
+    e.preventDefault();
+    if (location.pathname !== '/') {
+      navigate('/', { state: { scrollToContact: true } });
+    } else {
+      const contactSection = document.getElementById('contact-section');
+      if (contactSection) {
+        contactSection.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   };
 
   return (
     <nav className="navbar">
-      <Link to="/" className={location.pathname === '/' ? 'active' : ''}>Home</Link>
-      <Link to="/gallery" className={location.pathname === '/gallery' ? 'active' : ''}>Gallery</Link>
-      <Link to="/contact" className={location.pathname === '/contact' ? 'active' : ''}>Contact</Link>
+      <a
+        href="#home"
+        className={location.pathname === '/' ? 'active' : ''}
+        onClick={handleHomeClick}
+        style={{ cursor: 'pointer' }}
+      >
+        Home
+      </a>
+      <a
+        href="#gallery-section"
+        className={location.pathname === '/' ? '' : ''}
+        onClick={handleGalleryClick}
+        style={{ cursor: 'pointer' }}
+      >
+        Gallery
+      </a>
+      <a
+        href="#contact-section"
+        className={location.pathname === '/' ? '' : ''}
+        onClick={handleContactClick}
+        style={{ cursor: 'pointer' }}
+      >
+        Contact
+      </a>
     </nav>
   );
 }
@@ -93,11 +146,12 @@ function Home() {
   return (
     <div className="hero-section">
       <div className="hero-content">
-        <h1>Alex Novo</h1>
+        <h1>Vaisakh Y P</h1>
         <h2>Fine Art & Portrait Photographer</h2>
         <p>
-          Capturing moments, creating art. <br />
-          Explore my curated collection of works.
+          I'm Vaisakh Y P, a passionate fine art and portrait photographer.<br />
+          Through my lens, I capture emotion, light, and storytelling in every frame.<br />
+          Whether it's a quiet moment or a powerful portrait, I strive to turn each image into a lasting piece of art.
         </p>
       </div>
     </div>
@@ -158,7 +212,7 @@ function Gallery() {
   if (error) return <div className="error-message">{error}</div>;
 
   return (
-    <div className="gallery-container">
+    <div className="gallery-container" id="gallery-section">
       <h2>Photo Gallery</h2>
       <div className="aww-gallery-grid">
         {images.map((img, idx) => (
@@ -169,9 +223,6 @@ function Gallery() {
               className="aww-gallery-img"
               loading="lazy"
             />
-            <div className="aww-gallery-overlay">
-              <div className="aww-gallery-title">{img.filename}</div>
-            </div>
           </div>
         ))}
       </div>
@@ -192,17 +243,100 @@ function Gallery() {
 }
 
 function Contact() {
+  const [form, setForm] = useState({ name: '', email: '', message: '' });
+  const [sending, setSending] = useState(false);
+  const [result, setResult] = useState(null);
+
+  const handleChange = e => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+    setSending(true);
+    setResult(null);
+    try {
+      const res = await fetch('http://localhost:5000/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      if (res.ok) {
+        setResult({ success: true, message: 'Message sent successfully!' });
+        setForm({ name: '', email: '', message: '' });
+      } else {
+        const data = await res.json();
+        setResult({ success: false, message: data.error || 'Failed to send message.' });
+      }
+    } catch (err) {
+      setResult({ success: false, message: 'Failed to send message.' });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const whatsappLink = `https://wa.me/919656595993?text=${encodeURIComponent(
+    'Hello Vaisakh, I would like to get in touch with you!'
+  )}`;
+
   return (
     <div className="page contact-page">
       <h1>Contact Me</h1>
-      <p>
-        <b>Email:</b> info@alexnovo.com<br/>
-        <b>Phone:</b> +1 (555) 987-6543<br/>
-        <b>Instagram:</b> @alexnovophoto
-      </p>
-      <p style={{color:'#aaa', fontSize:'0.9em', marginTop: '1.5rem'}}>
-        This is dummy contact info. Please replace it with your real details for a live site.
-      </p>
+      <form className="contact-form" onSubmit={handleSubmit}>
+        <input
+          type="text"
+          name="name"
+          placeholder="Your Name"
+          value={form.name}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="email"
+          name="email"
+          placeholder="Your Email"
+          value={form.email}
+          onChange={handleChange}
+          required
+        />
+        <textarea
+          name="message"
+          placeholder="Your Message"
+          value={form.message}
+          onChange={handleChange}
+          required
+        />
+        <button type="submit" disabled={sending}>
+          {sending ? 'Sending...' : 'Send Message'}
+        </button>
+        {result && (
+          <div className={result.success ? 'success' : 'error'} style={{ marginTop: '1rem' }}>
+            {result.message}
+          </div>
+        )}
+      </form>
+      <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+        <a
+          href={whatsappLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="whatsapp-btn"
+          style={{
+            display: 'inline-block',
+            background: '#25D366',
+            color: '#fff',
+            padding: '0.8em 2em',
+            borderRadius: '8px',
+            fontWeight: 600,
+            fontSize: '1.1rem',
+            textDecoration: 'none',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+            transition: 'background 0.2s',
+          }}
+        >
+          Message on WhatsApp
+        </a>
+      </div>
     </div>
   );
 }
@@ -289,10 +423,32 @@ function Upload() {
 
 // New component to combine Home and Gallery on one page
 function MainPage() {
+  const location = useLocation();
+  useEffect(() => {
+    if (location.state && location.state.scrollToGallery) {
+      const gallerySection = document.getElementById('gallery-section');
+      if (gallerySection) {
+        setTimeout(() => {
+          gallerySection.scrollIntoView({ behavior: 'smooth' });
+        }, 100); // Wait for render
+      }
+    }
+    if (location.state && location.state.scrollToContact) {
+      const contactSection = document.getElementById('contact-section');
+      if (contactSection) {
+        setTimeout(() => {
+          contactSection.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      }
+    }
+  }, [location]);
   return (
     <>
       <Home />
       <Gallery />
+      <div id="contact-section">
+        <Contact />
+      </div>
     </>
   );
 }
@@ -304,7 +460,7 @@ export default function App() {
       <InstallPrompt />
       <Navbar />
       <Routes>
-        <Route path="/" element={<MainPage />} /> {/* Render MainPage on the root */}
+        <Route path="/" element={<MainPage />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/upload" element={<Upload />} />

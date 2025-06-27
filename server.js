@@ -4,6 +4,7 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
+const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = 5000;
@@ -201,6 +202,55 @@ app.delete('/api/image/:filename', (req, res) => {
   });
   
   res.json({ message: `Deleted ${deletedCount} files` });
+});
+
+// Contact form endpoint
+app.post('/api/contact', express.json(), async (req, res) => {
+  console.log('Received contact form submission');
+  const { name, email, message } = req.body;
+  console.log('Form data:', { name, email, message });
+  if (!name || !email || !message) {
+    console.log('Missing fields in contact form');
+    return res.status(400).json({ error: 'All fields are required.' });
+  }
+  try {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'ysakhyp@gmail.com',
+        pass: 'ahnq pguq agrj qcve',
+      },
+    });
+    await transporter.sendMail({
+      from: 'ysakhyp@gmail.com',
+      to: 'ysakhyp@gmail.com', // Changed to your Gmail
+      subject: `New Contact Form Submission from ${name} (${email})`,
+      text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}\n\n---\nReply to: ${email}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #333;">New Contact Form Submission</h2>
+          <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> <a href="mailto:${email}" style="color: #007bff;">${email}</a></p>
+            <p><strong>Message:</strong></p>
+            <div style="background: white; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;">
+              ${message.replace(/\n/g, '<br/>')}
+            </div>
+          </div>
+          <div style="background: #e9ecef; padding: 15px; border-radius: 5px; text-align: center;">
+            <p style="margin: 0; color: #495057;">
+              <strong>Reply to:</strong> <a href="mailto:${email}" style="color: #007bff; text-decoration: none;">${email}</a>
+            </p>
+          </div>
+        </div>
+      `
+    });
+    console.log('Email sent successfully');
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Contact form error:', err);
+    res.status(500).json({ error: 'Failed to send email.' });
+  }
 });
 
 app.listen(PORT, () => {
