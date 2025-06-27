@@ -2151,16 +2151,40 @@ body, html {
 
 @media (max-width: 600px) {
   .qr-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
     gap: 1.2rem;
     padding: 1rem 0.2rem;
+    max-width: 100%;
   }
   .qr-image {
-    width: 90px;
-    height: 90px;
+    width: 160px;
+    height: 160px;
+    max-width: 90vw;
+    max-height: 40vw;
+    margin: 0 auto 0.7rem auto;
+    display: block;
   }
-  .qr-item {
-    padding: 0.8rem 0.5rem 0.7rem 0.5rem;
+  .qr-caption {
+    font-size: 1rem;
+    text-align: center;
+    margin-bottom: 0.2rem;
+  }
+  .qr-note {
+    font-size: 0.95rem;
+    margin-top: 0.7rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .qr-image {
+    width: 120px;
+    height: 120px;
+    max-width: 95vw;
+    max-height: 50vw;
+  }
+  .social-link {
+    font-size: 1rem;
+    padding: 1rem 0.5rem;
   }
 }
 
@@ -2264,5 +2288,79 @@ body, html {
     top: 0.5rem;
     right: 0.7rem;
     font-size: 2rem;
+  }
+}
+
+/* --- Mobile Friendly Social Media & QR Section --- */
+@media (max-width: 600px) {
+  .social-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.2rem;
+    justify-items: center;
+  }
+  .social-link {
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.2rem 1rem;
+    font-size: 1.1rem;
+    border-radius: 10px;
+    width: 100%;
+    min-height: 56px;
+    box-sizing: border-box;
+  }
+  .social-icon {
+    font-size: 2rem;
+    min-width: 2.2rem;
+    text-align: center;
+  }
+  .social-link span:last-child {
+    font-size: 1rem;
+    font-weight: 500;
+  }
+  .qr-section {
+    margin-top: 2rem;
+    padding: 0 0.2rem;
+  }
+  .qr-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.2rem;
+    padding: 1rem 0.2rem;
+    max-width: 100%;
+  }
+  .qr-item {
+    padding: 1.2rem 0.5rem 1rem 0.5rem;
+    border-radius: 12px;
+  }
+  .qr-image {
+    width: 160px;
+    height: 160px;
+    max-width: 90vw;
+    max-height: 40vw;
+    margin: 0 auto 0.7rem auto;
+    display: block;
+  }
+  .qr-caption {
+    font-size: 1rem;
+    text-align: center;
+    margin-bottom: 0.2rem;
+  }
+  .qr-note {
+    font-size: 0.95rem;
+    margin-top: 0.7rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .qr-image {
+    width: 120px;
+    height: 120px;
+    max-width: 95vw;
+    max-height: 50vw;
+  }
+  .social-link {
+    font-size: 1rem;
+    padding: 1rem 0.5rem;
   }
 }
