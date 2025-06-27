@@ -5,6 +5,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import imageCompression from 'browser-image-compression';
 import './App.css';
 import introBg from './assets/intro-bg.jpg';
+import introBgIco from './assets/intro-bg.ico';
+import instaProfileQR from './assets/Insta Profile.jpg';
+import instaPageQR from './assets/Insta Page.jpg';
+import youtubeQR from './assets/Youtube.jpg';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -254,6 +258,7 @@ function VideoGallery() {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [videoModal, setVideoModal] = useState({ open: false, src: null });
 
   useEffect(() => {
     fetch(`${API_URL}/api/videos`)
@@ -276,11 +281,25 @@ function VideoGallery() {
       <h2>Video Gallery</h2>
       <div className="aww-gallery-grid">
         {videos.map((video, idx) => (
-          <div key={video.filename || idx} className="aww-gallery-item">
+          <div key={video.filename || idx} className="aww-gallery-item" onClick={() => setVideoModal({ open: true, src: `${API_URL}${video.url}` })}>
             <VideoHoverPlayer src={`${API_URL}${video.url}`} />
           </div>
         ))}
       </div>
+      {videoModal.open && (
+        <div className="qr-modal-overlay" onClick={() => setVideoModal({ open: false, src: null })}>
+          <div className="qr-modal-content" onClick={e => e.stopPropagation()}>
+            <button className="qr-modal-close" onClick={() => setVideoModal({ open: false, src: null })}>&times;</button>
+            <video
+              src={videoModal.src}
+              className="qr-modal-img"
+              controls
+              autoPlay
+              style={{ background: '#000', borderRadius: '12px', maxHeight: '70vh', width: '100%', maxWidth: '600px' }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -310,6 +329,7 @@ function Contact() {
   const [form, setForm] = useState({ name: '', email: '', message: '' });
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState(null);
+  const [qrModal, setQrModal] = useState({ open: false, img: null, caption: '', link: '', linkText: '' });
 
   const handleChange = e => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -326,7 +346,7 @@ function Contact() {
         body: JSON.stringify(form),
       });
       if (res.ok) {
-        setResult({ success: true, message: 'Message sent successfully!' });
+        setResult({ success: true, message: 'Message sent successfully! 📸' });
         setForm({ name: '', email: '', message: '' });
       } else {
         const data = await res.json();
@@ -340,67 +360,193 @@ function Contact() {
   };
 
   const whatsappLink = `https://wa.me/919656595993?text=${encodeURIComponent(
-    'Hello Vaisakh, I would like to get in touch with you!'
+    'Hello Vaisakh! I saw your amazing photography portfolio and would love to connect! 📸✨'
   )}`;
 
   return (
     <div className="page contact-page">
-      <h1>Contact Me</h1>
-      <form className="contact-form" onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="name"
-          placeholder="Your Name"
-          value={form.name}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="Your Email"
-          value={form.email}
-          onChange={handleChange}
-          required
-        />
-        <textarea
-          name="message"
-          placeholder="Your Message"
-          value={form.message}
-          onChange={handleChange}
-          required
-        />
-        <button type="submit" disabled={sending}>
-          {sending ? 'Sending...' : 'Send Message'}
-        </button>
-        {result && (
-          <div className={result.success ? 'success' : 'error'} style={{ marginTop: '1rem' }}>
-            {result.message}
-          </div>
-        )}
-      </form>
-      <div style={{ textAlign: 'center', marginTop: '2rem' }}>
-        <a
-          href={whatsappLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="whatsapp-btn"
-          style={{
-            display: 'inline-block',
-            background: '#25D366',
-            color: '#fff',
-            padding: '0.8em 2em',
-            borderRadius: '8px',
-            fontWeight: 600,
-            fontSize: '1.1rem',
-            textDecoration: 'none',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
-            transition: 'background 0.2s',
-          }}
-        >
-          Message on WhatsApp
-        </a>
+      <div className="contact-header">
+        <h1>Let's Create Magic Together! ✨</h1>
+        <p className="contact-subtitle">
+          Ready to turn your moments into timeless art? Whether you want to chat about photography, 
+          book a session, or just share your favorite memes, I'm all ears! 🎭
+        </p>
       </div>
+
+      <div className="contact-content">
+        <div className="contact-info-section">
+          <h2>📞 Get In Touch</h2>
+          <div className="contact-details">
+            <div className="contact-item">
+              <span className="contact-icon">👤</span>
+              <div>
+                <strong>Vaisakh Y P</strong>
+                <span>Your friendly neighborhood photographer</span>
+              </div>
+            </div>
+            
+            <div className="contact-item">
+              <span className="contact-icon">📧</span>
+              <div>
+                <strong>Email</strong>
+                <a href="mailto:ysakhyp@live.in">ysakhyp@live.in</a>
+              </div>
+            </div>
+            
+            <div className="contact-item">
+              <span className="contact-icon">📱</span>
+              <div>
+                <strong>Phone</strong>
+                <a href="tel:+918893706307">+91 88937 06307</a>
+                <a href="tel:+919656595993">+91 96565 95993</a>
+              </div>
+            </div>
+          </div>
+
+          <div className="social-links">
+            <h3>🌐 Follow My Adventures</h3>
+            <div className="social-grid">
+              <a 
+                href="https://www.instagram.com/frames_by_ysh/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="social-link instagram"
+              >
+                <span className="social-icon">📸</span>
+                <span>Frames by YSH</span>
+              </a>
+              
+              <a 
+                href="https://www.instagram.com/ysakhyp/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="social-link instagram"
+              >
+                <span className="social-icon">👤</span>
+                <span>Personal Profile</span>
+              </a>
+              
+              <a 
+                href="https://www.facebook.com/vaisakh.yp" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="social-link facebook"
+              >
+                <span className="social-icon">📘</span>
+                <span>Facebook</span>
+              </a>
+              
+              <a 
+                href="https://www.youtube.com/@framesandvisualsbyYsh" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="social-link youtube"
+              >
+                <span className="social-icon">📺</span>
+                <span>YouTube</span>
+              </a>
+            </div>
+            <div className="qr-section">
+              <div className="qr-grid">
+                <div className="qr-item">
+                  <img src={instaProfileQR} alt="Instagram Personal Profile QR" className="qr-image" onClick={() => setQrModal({ open: true, img: instaProfileQR, caption: 'Insta Profile', link: 'https://www.instagram.com/ysakhyp/', linkText: '@ysakhyp' })} />
+                  <div className="qr-caption">
+                    <span>Insta Profile</span><br />
+                    <a href="https://www.instagram.com/ysakhyp/" target="_blank" rel="noopener noreferrer">@ysakhyp</a>
+                  </div>
+                </div>
+                <div className="qr-item">
+                  <img src={instaPageQR} alt="Instagram Page QR" className="qr-image" onClick={() => setQrModal({ open: true, img: instaPageQR, caption: 'Insta Page', link: 'https://www.instagram.com/frames_by_ysh/', linkText: '@frames_by_ysh' })} />
+                  <div className="qr-caption">
+                    <span>Insta Page</span><br />
+                    <a href="https://www.instagram.com/frames_by_ysh/" target="_blank" rel="noopener noreferrer">@frames_by_ysh</a>
+                  </div>
+                </div>
+                <div className="qr-item">
+                  <img src={youtubeQR} alt="YouTube Channel QR" className="qr-image" onClick={() => setQrModal({ open: true, img: youtubeQR, caption: 'YouTube', link: 'https://www.youtube.com/@framesandvisualsbyYsh', linkText: 'framesandvisualsbyYsh' })} />
+                  <div className="qr-caption">
+                    <span>YouTube</span><br />
+                    <a href="https://www.youtube.com/@framesandvisualsbyYsh" target="_blank" rel="noopener noreferrer">framesandvisualsbyYsh</a>
+                  </div>
+                </div>
+              </div>
+              <div className="qr-note">Scan any QR to connect instantly!</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="contact-form-section">
+          <h2>💌 Send Me a Message</h2>
+          <p className="form-subtitle">
+            Have a project in mind? Want to collaborate? Or just want to say hi? 
+            Drop me a line and let's make something beautiful together! 🎨
+          </p>
+          
+          <form className="contact-form" onSubmit={handleSubmit}>
+            <input
+              type="text"
+              name="name"
+              placeholder="Your Awesome Name ✨"
+              value={form.name}
+              onChange={handleChange}
+              required
+            />
+            <input
+              type="email"
+              name="email"
+              placeholder="Your Email Address 📧"
+              value={form.email}
+              onChange={handleChange}
+              required
+            />
+            <textarea
+              name="message"
+              placeholder="Tell me about your vision, project, or just share a joke! 😄"
+              value={form.message}
+              onChange={handleChange}
+              required
+              rows="5"
+            />
+            <button type="submit" disabled={sending} className="submit-btn">
+              {sending ? '📤 Sending...' : '🚀 Send Message'}
+            </button>
+            {result && (
+              <div className={`result-message ${result.success ? 'success' : 'error'}`}>
+                {result.message}
+              </div>
+            )}
+          </form>
+
+          <div className="whatsapp-section">
+            <p>💬 Prefer instant messaging?</p>
+            <a
+              href={whatsappLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="whatsapp-btn"
+            >
+              📱 Chat on WhatsApp
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div className="contact-footer">
+        <p>🎭 Available for: Portraits • Events • Commercial • Creative Projects • Coffee Chats ☕</p>
+        <p>📍 Based in Kerala, India • Available Worldwide 🌍</p>
+      </div>
+      {qrModal.open && (
+        <div className="qr-modal-overlay" onClick={() => setQrModal({ ...qrModal, open: false })}>
+          <div className="qr-modal-content" onClick={e => e.stopPropagation()}>
+            <button className="qr-modal-close" onClick={() => setQrModal({ ...qrModal, open: false })}>&times;</button>
+            <img src={qrModal.img} alt={qrModal.caption} className="qr-modal-img" />
+            <div className="qr-modal-caption">
+              <span>{qrModal.caption}</span><br />
+              <a href={qrModal.link} target="_blank" rel="noopener noreferrer">{qrModal.linkText}</a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -587,6 +733,21 @@ function MainPage() {
 }
 
 export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate initial loading time for better UX
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000); // 2 seconds loading time
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <InitialLoader />;
+  }
+
   return (
     <div className="fullscreen-bg">
       <OfflineIndicator />
@@ -597,6 +758,58 @@ export default function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/upload" element={<Upload />} />
       </Routes>
+    </div>
+  );
+}
+
+// Enhanced Initial Loader Component
+function InitialLoader() {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          return 100;
+        }
+        return prev + Math.random() * 15 + 5; // Random progress increments
+      });
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="initial-loader-overlay">
+      <div className="initial-loader-content">
+        <div className="loader-logo">
+          <div className="camera-icon">
+            <div className="camera-body"></div>
+            <div className="camera-lens"></div>
+            <div className="camera-flash"></div>
+          </div>
+        </div>
+        
+        <h1 className="loader-title">Vaisakh Y P</h1>
+        <p className="loader-subtitle">Fine Art & Portrait Photography</p>
+        
+        <div className="loader-progress">
+          <div className="progress-bar">
+            <div 
+              className="progress-fill" 
+              style={{ width: `${Math.min(progress, 100)}%` }}
+            ></div>
+          </div>
+          <span className="progress-text">{Math.round(progress)}%</span>
+        </div>
+        
+        <div className="loader-dots">
+          <div className="dot"></div>
+          <div className="dot"></div>
+          <div className="dot"></div>
+        </div>
+      </div>
     </div>
   );
 }
