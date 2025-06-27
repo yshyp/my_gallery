@@ -222,7 +222,7 @@ function Gallery() {
         {images.map((img, idx) => (
           <div key={img.filename || idx} className="aww-gallery-item" onClick={() => openModal(idx)}>
             <img
-              src={`${API_URL}/uploads/${img.filename}`}
+              src={`${API_URL}${img.thumbnailUrl}`}
               alt={`gallery-item-${idx}`}
               className="aww-gallery-img"
               loading="lazy"
@@ -234,7 +234,7 @@ function Gallery() {
         <div className="simple-modal" onClick={closeModal}>
           <div className="simple-modal-content" onClick={e => e.stopPropagation()}>
             <img
-              src={`${API_URL}/uploads/${images[selectedIdx].filename}`}
+              src={`${API_URL}${images[selectedIdx].optimizedUrl}`}
               alt="full-size"
               className="simple-modal-img"
             />
