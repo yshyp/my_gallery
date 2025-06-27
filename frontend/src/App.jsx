@@ -185,6 +185,7 @@ function Gallery() {
       setLoading(true);
       console.log('Fetching images from:', `${API_URL}/api/images`);
       const response = await fetch(`${API_URL}/api/images`);
+      console.log('Response:', response);
       if (response.ok) {
         let data = await response.json();
         // Sort by timestamp (newest first), fallback to filename
