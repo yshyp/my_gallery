@@ -180,9 +180,10 @@ app.post('/api/contact', async (req, res) => {
 // Serve React (Vite)
 const FRONTEND_BUILD = path.join(__dirname, 'frontend', 'dist');
 app.use(express.static(FRONTEND_BUILD));
-app.get('*', (_, res) => {
+app.get('/*', (req, res) => {
   res.sendFile(path.join(FRONTEND_BUILD, 'index.html'));
 });
+
 
 // Start server
 app.listen(PORT, () => {
