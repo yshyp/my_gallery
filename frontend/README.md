@@ -1,3 +1,45 @@
+# Photo Gallery Frontend
+
+A modern, interactive photo gallery built with React and Vite.
+
+## Environment Setup
+
+1. Copy the example environment file:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Update the `.env` file with your backend API URL:
+   ```
+   VITE_API_URL=http://localhost:5000
+   ```
+
+   **Note:** 
+   - For local development, use `http://localhost:5000`
+   - For production, use your actual backend URL
+   - If accessing from a different device, use your computer's IP address instead of localhost
+
+## Development
+
+```bash
+npm install
+npm run dev
+```
+
+## Build
+
+```bash
+npm run build
+```
+
+## Features
+
+- Interactive photo gallery with masonry layout
+- Image upload functionality
+- PWA support with offline capabilities
+- Modern, responsive design
+- Image optimization and lazy loading
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

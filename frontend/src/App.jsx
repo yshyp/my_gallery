@@ -6,7 +6,7 @@ import imageCompression from 'browser-image-compression';
 import './App.css';
 import introBg from './assets/intro-bg.jpg';
 
-const API_URL = 'http://localhost:5000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 function Navbar() {
   const location = useLocation();
