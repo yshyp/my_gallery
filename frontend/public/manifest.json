@@ -3,7 +3,7 @@
   "short_name": "Vaisakh Y P",
   "description": "Vaisakh Y P - Fine Art & Portrait Photographer. Explore my portfolio of emotive, artistic, and storytelling images.",
   "start_url": "/",
-  "display": "standalone",
+  "display": "browser",
   "background_color": "#0a0a0a",
   "theme_color": "#0a0a0a",
   "orientation": "portrait-primary",

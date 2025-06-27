@@ -81,6 +81,8 @@ function Navbar() {
   );
 }
 
+// InstallPrompt component - DISABLED to prevent mobile install prompts
+/*
 function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallButton, setShowInstallButton] = useState(false);
@@ -118,6 +120,7 @@ function InstallPrompt() {
     </div>
   );
 }
+*/
 
 function OfflineIndicator() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -587,7 +590,6 @@ export default function App() {
   return (
     <div className="fullscreen-bg">
       <OfflineIndicator />
-      <InstallPrompt />
       <Navbar />
       <Routes>
         <Route path="/" element={<MainPage />} />
