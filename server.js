@@ -13,8 +13,9 @@ const PORT = 5000;
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
 const OPTIMIZED_DIR = path.join(__dirname, 'uploads', 'optimized');
 const THUMBNAILS_DIR = path.join(__dirname, 'uploads', 'thumbnails');
+const VIDEOS_DIR = path.join(__dirname, 'uploads', 'videos');
 
-[UPLOADS_DIR, OPTIMIZED_DIR, THUMBNAILS_DIR].forEach(dir => {
+[UPLOADS_DIR, OPTIMIZED_DIR, THUMBNAILS_DIR, VIDEOS_DIR].forEach(dir => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
@@ -48,10 +49,36 @@ const upload = multer({
   }
 });
 
+// Multer setup for video uploads
+const videoStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, VIDEOS_DIR);
+  },
+  filename: (req, file, cb) => {
+    const timestamp = Date.now();
+    const ext = path.extname(file.originalname);
+    const name = path.basename(file.originalname, ext);
+    cb(null, `${timestamp}-${name}${ext}`);
+  },
+});
+const uploadVideo = multer({
+  storage: videoStorage,
+  limits: { fileSize: 200 * 1024 * 1024 }, // 200MB limit
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['video/mp4', 'video/webm', 'video/quicktime'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only MP4, WebM, MOV videos are allowed.'), false);
+    }
+  }
+});
+
 app.use(cors());
 app.use('/uploads', express.static(UPLOADS_DIR));
 app.use('/optimized', express.static(OPTIMIZED_DIR));
 app.use('/thumbnails', express.static(THUMBNAILS_DIR));
+app.use('/videos', express.static(VIDEOS_DIR));
 
 // Image optimization function
 async function optimizeImage(originalPath, filename) {
@@ -253,9 +280,48 @@ app.post('/api/contact', express.json(), async (req, res) => {
   }
 });
 
+// Video upload endpoint
+app.post('/api/upload-video', (req, res, next) => {
+  uploadVideo.single('video')(req, res, function (err) {
+    if (err) {
+      console.error('Video upload error:', err);
+      return res.status(400).json({ error: 'Video upload failed: ' + err.message });
+    }
+    if (!req.file) {
+      console.error('No video uploaded');
+      return res.status(400).json({ error: 'No video uploaded' });
+    }
+    console.log('Video uploaded:', req.file.filename);
+    res.json({
+      filename: req.file.filename,
+      url: `/videos/${req.file.filename}`,
+      size: req.file.size
+    });
+  });
+});
+
+// List videos endpoint
+app.get('/api/videos', (req, res) => {
+  fs.readdir(VIDEOS_DIR, (err, files) => {
+    if (err) return res.status(500).json({ error: 'Failed to list videos' });
+    const videoFiles = files.filter(file => {
+      const ext = path.extname(file).toLowerCase();
+      return ['.mp4', '.webm', '.mov'].includes(ext.toLowerCase());
+    });
+    const videos = videoFiles.map(filename => ({
+      filename,
+      url: `/videos/${filename}`,
+      timestamp: parseInt(filename.split('-')[0])
+    }));
+    videos.sort((a, b) => b.timestamp - a.timestamp);
+    res.json(videos);
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
   console.log(`Uploads: ${UPLOADS_DIR}`);
   console.log(`Optimized: ${OPTIMIZED_DIR}`);
   console.log(`Thumbnails: ${THUMBNAILS_DIR}`);
+  console.log(`Videos: ${VIDEOS_DIR}`);
 }); 

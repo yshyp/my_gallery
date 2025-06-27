@@ -242,6 +242,62 @@ function Gallery() {
   );
 }
 
+function VideoGallery() {
+  const [videos, setVideos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/videos')
+      .then(res => res.json())
+      .then(data => {
+        setVideos(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError('Failed to load videos');
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <div className="loading-gallery">Loading videos...</div>;
+  if (error) return <div className="error-message">{error}</div>;
+
+  return (
+    <div className="gallery-container" id="video-gallery-section">
+      <h2>Video Gallery</h2>
+      <div className="aww-gallery-grid">
+        {videos.map((video, idx) => (
+          <div key={video.filename || idx} className="aww-gallery-item">
+            <VideoHoverPlayer src={`http://localhost:5000${video.url}`} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function VideoHoverPlayer({ src }) {
+  const videoRef = useRef(null);
+  return (
+    <video
+      ref={videoRef}
+      src={src}
+      className="aww-gallery-img"
+      muted
+      preload="metadata"
+      poster=""
+      onMouseEnter={() => videoRef.current && videoRef.current.play()}
+      onMouseLeave={() => videoRef.current && videoRef.current.pause()}
+      onTouchStart={() => videoRef.current && videoRef.current.play()}
+      onTouchEnd={() => videoRef.current && videoRef.current.pause()}
+      loop
+      playsInline
+      style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+    />
+  );
+}
+
 function Contact() {
   const [form, setForm] = useState({ name: '', email: '', message: '' });
   const [sending, setSending] = useState(false);
@@ -342,10 +398,15 @@ function Contact() {
 }
 
 function Upload() {
+  const [activeTab, setActiveTab] = useState('images');
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [results, setResults] = useState([]);
+  const [videoUploading, setVideoUploading] = useState(false);
+  const [videoError, setVideoError] = useState('');
+  const [videoSuccess, setVideoSuccess] = useState('');
+  const [videoResults, setVideoResults] = useState([]);
 
   const handleUpload = async (e) => {
     const files = Array.from(e.target.files);
@@ -393,30 +454,93 @@ function Upload() {
     setSuccess(allSuccess ? 'All images uploaded successfully!' : 'Some images failed to upload.');
   };
 
+  const handleVideoUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    setVideoUploading(true);
+    setVideoError('');
+    setVideoSuccess('');
+    setVideoResults([]);
+    let allSuccess = true;
+    const newResults = [];
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append('video', file, file.name);
+      try {
+        const res = await fetch('http://localhost:5000/api/upload-video', {
+          method: 'POST',
+          body: formData,
+        });
+        if (!res.ok) {
+          let errorMessage = 'Upload failed';
+          try {
+            const errorData = await res.json();
+            errorMessage = errorData.error || errorMessage;
+          } catch {}
+          throw new Error(errorMessage);
+        }
+        newResults.push({ name: file.name, status: 'success' });
+      } catch (e) {
+        allSuccess = false;
+        newResults.push({ name: file.name, status: 'error', message: e.message });
+      }
+    }
+    setVideoResults(newResults);
+    setVideoUploading(false);
+    setVideoSuccess(allSuccess ? 'All videos uploaded successfully!' : 'Some videos failed to upload.');
+  };
+
   return (
     <div className="page upload-page">
-      <h1>Upload Images</h1>
-      <Link to="/" className="upload-link">Back to Home/Gallery</Link>
-      <div className="upload-section">
-        <label className="upload-btn">
-          {uploading ? 'Uploading...' : 'Choose Images to Upload'}
-          <input type="file" accept="image/*" multiple onChange={handleUpload} disabled={uploading} hidden />
-        </label>
-        {error && <div className="error">{error}</div>}
-        {success && <div className="success">{success}</div>}
-        {results.length > 0 && (
-          <ul style={{ margin: '1rem 0', padding: 0, listStyle: 'none', color: '#fff' }}>
-            {results.map((r, i) => (
-              <li key={i} style={{ color: r.status === 'success' ? '#4caf50' : '#f44336' }}>
-                {r.name}: {r.status === 'success' ? 'Uploaded' : `Error - ${r.message}`}
-              </li>
-            ))}
-          </ul>
-        )}
-        <p style={{ color: '#aaa', fontSize: '0.9em' }}>
-          You can select and upload multiple images at once.<br />Accepted file types: JPEG, PNG, GIF, WebP, BMP, TIFF.
-        </p>
+      <h1>Upload Media</h1>
+      <div className="upload-tabs">
+        <button className={activeTab === 'images' ? 'active' : ''} onClick={() => setActiveTab('images')}>Images</button>
+        <button className={activeTab === 'videos' ? 'active' : ''} onClick={() => setActiveTab('videos')}>Videos</button>
       </div>
+      {activeTab === 'images' && (
+        <div className="upload-section">
+          <label className="upload-btn">
+            {uploading ? 'Uploading...' : 'Choose Images to Upload'}
+            <input type="file" accept="image/*" multiple onChange={handleUpload} disabled={uploading} hidden />
+          </label>
+          {error && <div className="error">{error}</div>}
+          {success && <div className="success">{success}</div>}
+          {results.length > 0 && (
+            <ul style={{ margin: '1rem 0', padding: 0, listStyle: 'none', color: '#fff' }}>
+              {results.map((r, i) => (
+                <li key={i} style={{ color: r.status === 'success' ? '#4caf50' : '#f44336' }}>
+                  {r.name}: {r.status === 'success' ? 'Uploaded' : `Error - ${r.message}`}
+                </li>
+              ))}
+            </ul>
+          )}
+          <p style={{ color: '#aaa', fontSize: '0.9em' }}>
+            You can select and upload multiple images at once.<br />Accepted file types: JPEG, PNG, GIF, WebP, BMP, TIFF.
+          </p>
+        </div>
+      )}
+      {activeTab === 'videos' && (
+        <div className="upload-section">
+          <label className="upload-btn">
+            {videoUploading ? 'Uploading...' : 'Choose Videos to Upload'}
+            <input type="file" accept="video/mp4,video/webm,video/quicktime" multiple onChange={handleVideoUpload} disabled={videoUploading} hidden />
+          </label>
+          {videoError && <div className="error">{videoError}</div>}
+          {videoSuccess && <div className="success">{videoSuccess}</div>}
+          {videoResults.length > 0 && (
+            <ul style={{ margin: '1rem 0', padding: 0, listStyle: 'none', color: '#fff' }}>
+              {videoResults.map((r, i) => (
+                <li key={i} style={{ color: r.status === 'success' ? '#4caf50' : '#f44336' }}>
+                  {r.name}: {r.status === 'success' ? 'Uploaded' : `Error - ${r.message}`}
+                </li>
+              ))}
+            </ul>
+          )}
+          <p style={{ color: '#aaa', fontSize: '0.9em' }}>
+            You can select and upload multiple videos at once.<br />Accepted file types: MP4, WebM, MOV.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
@@ -446,6 +570,7 @@ function MainPage() {
     <>
       <Home />
       <Gallery />
+      <VideoGallery />
       <div id="contact-section">
         <Contact />
       </div>
