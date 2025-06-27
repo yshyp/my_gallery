@@ -186,7 +186,7 @@ app.post('/api/contact', async (req, res) => {
 });
 
 /*────────────────── SPA FALLBACK (MUST BE LAST) ──────────────────*/
-const FRONTEND_BUILD = path.join(__dirname, 'frontend', 'dist');
+const FRONTEND_BUILD = path.join(__dirname, 'dist');
 app.use(express.static(FRONTEND_BUILD));
 
 // Any GET request not handled above → send index.html
