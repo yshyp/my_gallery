@@ -8,6 +8,8 @@ import introBg from './assets/intro-bg.jpg';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
+console.log('API_URL:', API_URL);
+
 function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -181,6 +183,7 @@ function Gallery() {
   const fetchImages = async () => {
     try {
       setLoading(true);
+      console.log('Fetching images from:', `${API_URL}/api/images`);
       const response = await fetch(`${API_URL}/api/images`);
       if (response.ok) {
         let data = await response.json();
@@ -197,6 +200,7 @@ function Gallery() {
         setError('Failed to load images');
       }
     } catch (error) {
+      console.error('Fetch error:', error);
       setError('Network error: ' + error.message);
     } finally {
       setLoading(false);
@@ -248,7 +252,7 @@ function VideoGallery() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/videos')
+    fetch(`${API_URL}/api/videos`)
       .then(res => res.json())
       .then(data => {
         setVideos(data);
@@ -269,7 +273,7 @@ function VideoGallery() {
       <div className="aww-gallery-grid">
         {videos.map((video, idx) => (
           <div key={video.filename || idx} className="aww-gallery-item">
-            <VideoHoverPlayer src={`http://localhost:5000${video.url}`} />
+            <VideoHoverPlayer src={`${API_URL}${video.url}`} />
           </div>
         ))}
       </div>
@@ -312,7 +316,7 @@ function Contact() {
     setSending(true);
     setResult(null);
     try {
-      const res = await fetch('http://localhost:5000/api/contact', {
+      const res = await fetch(`${API_URL}/api/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
@@ -467,7 +471,7 @@ function Upload() {
       const formData = new FormData();
       formData.append('video', file, file.name);
       try {
-        const res = await fetch('http://localhost:5000/api/upload-video', {
+        const res = await fetch(`${API_URL}/api/upload-video`, {
           method: 'POST',
           body: formData,
         });
