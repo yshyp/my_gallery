@@ -89,8 +89,6 @@ async function optimizeImage(originalPath, filename) {
   return { optimized, thumbnail };
 }
 
-// API Routes
-
 // Upload Image
 app.post('/api/upload', uploadImage.single('image'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
@@ -180,10 +178,11 @@ app.post('/api/contact', async (req, res) => {
 // Serve React (Vite)
 const FRONTEND_BUILD = path.join(__dirname, 'frontend', 'dist');
 app.use(express.static(FRONTEND_BUILD));
-app.get('/*', (req, res) => {
+
+// Catch-all route for SPA (fixes path-to-regexp error)
+app.use((req, res) => {
   res.sendFile(path.join(FRONTEND_BUILD, 'index.html'));
 });
-
 
 // Start server
 app.listen(PORT, () => {
