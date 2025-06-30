@@ -255,6 +255,9 @@ body, html, .fullscreen-bg {
   padding-left: 30px;
   background-clip: padding-box;
 }
+.gallery-page {
+  perspective: 800px;
+}
 .masonry-item {
   margin-bottom: 30px;
   border-radius: 14px;
@@ -262,7 +265,8 @@ body, html, .fullscreen-bg {
   background: #181818;
   box-shadow: 0 2px 16px #000a;
   cursor: pointer;
-  transition: box-shadow 0.2s;
+  transform-style: preserve-3d;
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 .masonry-img {
   width: 100%;
@@ -272,8 +276,12 @@ body, html, .fullscreen-bg {
   max-height: 400px;
   transition: transform 0.3s;
 }
+.masonry-item:hover {
+  transform: rotateY(-12deg) rotateX(6deg);
+  box-shadow: 0 8px 32px #000c;
+}
 .masonry-item:hover .masonry-img {
-  transform: scale(1.04) rotate(-1deg);
+  transform: scale(1.02);
 }
 
 .modal {
