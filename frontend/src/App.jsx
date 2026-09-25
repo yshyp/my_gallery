@@ -340,7 +340,7 @@ function Contact() {
     setSending(true);
     setResult(null);
     try {
-      const res = await fetch(`${API_URL}/api/contact`, {
+      const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
@@ -349,10 +349,16 @@ function Contact() {
         setResult({ success: true, message: 'Message sent successfully! 📸' });
         setForm({ name: '', email: '', message: '' });
       } else {
-        const data = await res.json();
+        let data = {};
+        try {
+          data = await res.json();
+        } catch {
+          // Keep the generic error if the API did not return JSON.
+        }
         setResult({ success: false, message: data.error || 'Failed to send message.' });
       }
     } catch (err) {
+      console.error('Contact form error:', err);
       setResult({ success: false, message: 'Failed to send message.' });
     } finally {
       setSending(false);
@@ -368,8 +374,7 @@ function Contact() {
       <div className="contact-header">
         <h1>Let's Create Magic Together! ✨</h1>
         <p className="contact-subtitle">
-          Ready to turn your moments into timeless art? Whether you want to chat about photography, 
-          book a session, or just share your favorite memes, I'm all ears! 🎭
+          Ready to turn your moments into timeless art? Whether it's a quiet moment or a powerful portrait, I strive to turn each image into a lasting piece of art.
         </p>
       </div>
 
